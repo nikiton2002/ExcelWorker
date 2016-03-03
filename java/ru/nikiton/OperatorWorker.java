@@ -37,8 +37,8 @@ public class OperatorWorker {
         int tableLastRowIndex = -1;
         int mainSheetLastRowIndex = -1;
         int namesCellIndex = -1;
-        int itogoHoursColumnIndex = -1;
-        int itogoPercentsColumnIndex = -1;
+//        int itogoHoursColumnIndex = -1;
+//        int itogoPercentsColumnIndex = -1;
 
 //1. 	Parsing .xls file to sheets + initializing operators Array:
         for(int i=0; i < wb.getNumberOfSheets(); i++) {
@@ -66,12 +66,12 @@ public class OperatorWorker {
                         namesCellIndex = i;
                         tableHatRowIndex = currentRowInMain.getRowNum();
                     }
-                    if(nextCell != null && nextCell.toString().contains("ИТОГО") && nextCell.toString().contains("часов")) {
+/*                    if(nextCell != null && nextCell.toString().contains("ИТОГО") && nextCell.toString().contains("часов")) {
                         itogoHoursColumnIndex = i;
                     }
                     if(nextCell != null && nextCell.toString().contains("ИТОГО") && nextCell.toString().contains("%")) {
                         itogoPercentsColumnIndex = i;
-                    }
+                    }*/
                 }
             }
             else {
@@ -87,12 +87,12 @@ public class OperatorWorker {
         if(namesCellIndex == -1 || tableHatRowIndex == -1) {
             throw new ExcelWorkerException("В сводной таблице не найдена ячейка \"Номер заказа\"");
         }
-        if(itogoHoursColumnIndex == -1) {
+/*        if(itogoHoursColumnIndex == -1) {
             throw new ExcelWorkerException("В сводной таблице не найдена ячейка \"ИТОГО часов\"");
         }
         if(itogoPercentsColumnIndex == -1) {
             throw new ExcelWorkerException("В сводной таблице не найдена ячейка \"ИТОГО %\"");
-        }
+        }*/
         if(tableLastRowIndex == -1) {
             throw new ExcelWorkerException("В сводной таблице не найдена строка \"ВСЕГО по заказам\"");
         }
@@ -166,9 +166,11 @@ public class OperatorWorker {
             }
             //searching operators names in Main sheet and saving it`s cell positions in operator`s mainPos property
             Row tableHatRow = mainSheet.getRow(tableHatRowIndex);
-            for(int i = namesCellIndex+1; i < itogoHoursColumnIndex; i++) {
+            //for(int i = namesCellIndex+1; i < itogoHoursColumnIndex; i++) {
+            for(int i = namesCellIndex+1; i < tableHatRow.getLastCellNum(); i++) {
                 if(tableHatRow.getCell(i).toString().contains(operator.getName())) {
                     operator.setColumnIndex(i, Library.getColumnLetter(i));
+                    break;
                 }
             }
         }
@@ -226,10 +228,11 @@ public class OperatorWorker {
             newCell.setCellValue(orderName);
             newCell.setCellStyle(styles.orderNameStyle);
             //Create cells in last 2 columns (for correct styling)
-            Cell lastColValueCell = orderNextRow.createCell(itogoHoursColumnIndex);
+/*            Cell lastColValueCell = orderNextRow.createCell(itogoHoursColumnIndex);
             lastColValueCell.setCellStyle(styles.orderValStyle);
             Cell lastColPrcCell = orderNextRow.createCell(itogoPercentsColumnIndex);
             lastColPrcCell.setCellStyle(styles.orderPrcStyle);
+*/
             currentRowIndex++;
             sumByOrdersFormulaTemplate += "x"+(currentRowIndex)+"+";
             if(!orderName.equals("200.100")) {
@@ -241,10 +244,11 @@ public class OperatorWorker {
                     newCell.setCellValue(partData.getKey());
                     newCell.setCellStyle(styles.partNameStyle);
                     //Create cells in last 2 columns (for correct styling)
-                    lastColValueCell = partNextRow.createCell(itogoHoursColumnIndex);
+/*                    lastColValueCell = partNextRow.createCell(itogoHoursColumnIndex);
                     lastColValueCell.setCellStyle(styles.partValStyle);
                     lastColPrcCell = partNextRow.createCell(itogoPercentsColumnIndex);
                     lastColPrcCell.setCellStyle(styles.partPrcStyle);
+*/
                     currentRowIndex++;
                     sumByPartsFormulaTemplate += "x"+(currentRowIndex)+"+";
                     String sumByMTPsFormulaTemplate = "";
@@ -261,10 +265,11 @@ public class OperatorWorker {
                             newCell.setCellStyle(styles.mtpNameErrorStyle);
                         }
                         //Create cells in last 2 columns (for correct styling)
-                        lastColValueCell = mtpNextRow.createCell(itogoHoursColumnIndex);
+/*                        lastColValueCell = mtpNextRow.createCell(itogoHoursColumnIndex);
                         lastColValueCell.setCellStyle(styles.partValStyle);
                         lastColPrcCell = mtpNextRow.createCell(itogoPercentsColumnIndex);
                         lastColPrcCell.setCellStyle(styles.partPrcStyle);
+*/
                         currentRowIndex++;
                         sumByMTPsFormulaTemplate += "x"+(currentRowIndex)+"+";
                     }
@@ -278,21 +283,19 @@ public class OperatorWorker {
         //Make formula template for row with total amount formulas ("ВСЕГО по заказам")
         sumByOrdersFormulaTemplate = sumByOrdersFormulaTemplate.substring(0, sumByOrdersFormulaTemplate.length()-1);
         // Declare formulas for columns "ИТОГО", "ИТОГО %"
-        String summAllOperatorsFormulaTemplate = "";
+//        String summAllOperatorsFormulaTemplate = "";
 
         //4.3. Fill table columns "к-во времени, час" by operators
         for(Operator operator : operators) {
             TreeMap<String, TreeMap<String, TreeMap<String, Double>>> workingTimeMap = operator.getWorkingTimeMap();
             int CI = operator.getColumnIndex();
-            //String CL = operator.getColumnLetter();
             currentRowIndex = tableFirstRowIndex;
             for(Map.Entry<String, TreeMap<String, TreeMap<String, Double>>> orderData : workingTimeMap.entrySet()) {
                 Row orderRow = mainSheet.getRow(currentRowIndex);
-                //String RN = ((Integer)(currentRowIndex+1)).toString(); //RN - Row Number in real excel indexing (1 to 65535)
-                //String worktimeInPrcFormula = "ROUND((".concat(CL).concat(RN).concat("*100)/").concat(CL).concat("" + (tableLastRowIndex+1)).concat(",0)");
                 CellReference orderHoursCellRef = new CellReference(currentRowIndex, CI);
                 CellReference totalOrderHoursCellRef = new CellReference(tableLastRowIndex, CI);
-                String worktimeInPrcFormula = "ROUND((".concat(orderHoursCellRef.formatAsString()).concat("*100)/").concat(totalOrderHoursCellRef.formatAsString()).concat(",0)");
+                //String worktimeInPrcFormula = "ROUND((".concat(orderHoursCellRef.formatAsString()).concat("*100)/").concat(totalOrderHoursCellRef.formatAsString()).concat(",0)");
+                String worktimeInPrcFormula = "ROUND((".concat(orderHoursCellRef.formatAsString()).concat("*100)/").concat(totalOrderHoursCellRef.formatAsString()).concat(",2)");
                 if(orderData.getKey().equals("200.100")) {
                     Library.newCell(orderRow, CI, orderData.getValue().get("").get(""), styles.orderValStyle);
                     //Set percents formula in next cell
@@ -307,11 +310,10 @@ public class OperatorWorker {
                 for(Map.Entry<String, TreeMap<String, Double>> partData : orderData.getValue().entrySet()) {
                     //Print parts data (percents only)
                     //Create and set worktime in percents
-                    //RN = ((Integer) (currentRowIndex+1)).toString(); //RN - Row Number in real excel indexing (1 to 65535)
-                    //worktimeInPrcFormula = "ROUND((".concat(CL).concat(RN).concat("*100)/").concat(CL).concat("" + (tableLastRowIndex+1)).concat(",0)");
                     CellReference partHoursCellRef = new CellReference(currentRowIndex, CI);
                     CellReference totalPartHoursCellRef = new CellReference(tableLastRowIndex, CI);
-                    worktimeInPrcFormula = "ROUND((".concat(partHoursCellRef.formatAsString()).concat("*100)/").concat(totalPartHoursCellRef.formatAsString()).concat(",0)");
+                    //worktimeInPrcFormula = "ROUND((".concat(partHoursCellRef.formatAsString()).concat("*100)/").concat(totalPartHoursCellRef.formatAsString()).concat(",0)");
+                    worktimeInPrcFormula = "ROUND((".concat(partHoursCellRef.formatAsString()).concat("*100)/").concat(totalPartHoursCellRef.formatAsString()).concat(",2)");
                     Row partRow = mainSheet.getRow(currentRowIndex);
                     Library.newCellFormula(partRow, CI+1, worktimeInPrcFormula, styles.partPrcStyle);
                     currentRowIndex++;
@@ -320,20 +322,11 @@ public class OperatorWorker {
                         //Print worktime data and set worktime in percents
                         Double mtpVal = mtpData.getValue();
                         //Create worktime in percents formula
-                        //RN = ((Integer) (currentRowIndex+1)).toString(); //RN - Row Number in real excel indexing (1 to 65535)
-                        //worktimeInPrcFormula = "ROUND((".concat(CL).concat(RN).concat("*100)/").concat(CL).concat("" + (tableLastRowIndex+1)).concat(",0)");
                         CellReference mtpHoursCellRef = new CellReference(currentRowIndex, CI);
                         CellReference totalMtpHoursCellRef = new CellReference(tableLastRowIndex, CI);
-                        worktimeInPrcFormula = "ROUND((".concat(mtpHoursCellRef.formatAsString()).concat("*100)/").concat(totalMtpHoursCellRef.formatAsString()).concat(",0)");
+                        //worktimeInPrcFormula = "ROUND((".concat(mtpHoursCellRef.formatAsString()).concat("*100)/").concat(totalMtpHoursCellRef.formatAsString()).concat(",0)");
+                        worktimeInPrcFormula = "ROUND((".concat(mtpHoursCellRef.formatAsString()).concat("*100)/").concat(totalMtpHoursCellRef.formatAsString()).concat(",2)");
 
-/*                        if(mtpVal == 0d) {
-                            Library.newCell(mtpRow, CI, mtpVal, styles.partValZeroStyleGreen);
-                            Library.newCellFormula(mtpRow, CI+1, "", styles.partPrcZeroStyle);
-                        }
-                        else {
-                            Library.newCell(mtpRow, CI, mtpVal, styles.partValStyleGreen);
-                            Library.newCellFormula(mtpRow, CI+1, worktimeInPrcFormula, styles.partPrcStyle);
-                        }*/
                         Library.newCell(mtpRow, CI, mtpVal, true, styles.mtpValStyle);
                         Library.newCellFormula(mtpRow, CI+1, worktimeInPrcFormula, styles.mtpPrcStyle);
 
@@ -350,11 +343,10 @@ public class OperatorWorker {
             String sumByPartsInPrcFormula = sumByOrdersFormulaTemplate.replaceAll("x", CL1);
             Library.newCellFormula(mainSheet.getRow(tableLastRowIndex), CI1, sumByPartsInPrcFormula);
             //And assemble formula templates for last 2 columns (ИТОГО, ИТОГО %)
-            summAllOperatorsFormulaTemplate += CL+"x"+"+";
-            //itogoPrcFormulaTemplate += CL1+"x"+"+";
+//            summAllOperatorsFormulaTemplate += CL+"x"+"+";
         }
         //Make formula template for column ("ИТОГО часов")
-        summAllOperatorsFormulaTemplate = summAllOperatorsFormulaTemplate.substring(0, summAllOperatorsFormulaTemplate.length()-1);
+/*        summAllOperatorsFormulaTemplate = summAllOperatorsFormulaTemplate.substring(0, summAllOperatorsFormulaTemplate.length()-1);
 
         //4.4. Set formulas in last 2 columns "ИТОГО часов", "ИТОГО %"
         currentRowIndex = tableFirstRowIndex;
@@ -365,7 +357,6 @@ public class OperatorWorker {
             //"ИТОГО часов" formula
             //Cell itogoHoursCell = currentRow.createCell(itogoHoursColumnIndex);
             Cell itogoHoursCell = currentRow.getCell(itogoHoursColumnIndex);
-            //itogoHoursCell.setCellStyle(currentRow.getCell(itogoHoursColumnIndex-2).getCellStyle());
             itogoHoursCell.setCellFormula(summAllOperatorsFormula);
             //"ИТОГО %" formula
             String itogoCL = Library.getColumnLetter(itogoHoursColumnIndex);
@@ -381,7 +372,7 @@ public class OperatorWorker {
         Row currentRow = mainSheet.getRow(currentRowIndex);
         Cell itogoPercentsCell = currentRow.getCell(itogoPercentsColumnIndex);
         itogoPercentsCell.setCellFormula(finalSummByPercentsFormula);
-
+*/
 //5. Saving changes into file
         wb.write(new FileOutputStream(file));
         wb.close();

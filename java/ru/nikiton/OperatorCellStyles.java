@@ -37,8 +37,19 @@ public class OperatorCellStyles {
 
         //Data formats
         DataFormat format = wb.createDataFormat();
+/*
+ABOUT EXCEL CELL FORMATS
+0 (ноль) - одно обязательное знакоместо (разряд), т.е. это место в маске формата будет заполнено цифрой из числа, которое пользователь введет в ячейку. Если для этого знакоместа нет числа, то будет выведен ноль. Например, если к числу 12 применить маску 0000, то получится 0012, а если к числу 1,3456 применить маску 0,00 - получится 1,35.
+# (решетка) - одно необязательное знакоместо - примерно то же самое, что и ноль, но если для знакоместа нет числа, то ничего не выводится
+(пробел) - используется как разделитель групп разрядов по три между тысячами, миллионами, миллиардами и т.д.
+[ ] - в квадратных скобках перед маской формата можно указать цвет шрифта. Разрешено использовать следующие цвета: черный, белый, красный, синий, зеленый, жёлтый, голубой.
+
+Любой пользовательский текст (кг, чел, шт и тому подобные) или символы (в том числе и пробелы) - надо обязательно заключать в кавычки.
+Можно указать несколько (до 4-х) разных масок форматов через точку с запятой.
+Первая из масок будет применяться к ячейке, если число в ней положительное, вторая - если отрицательное, третья - если содержимое ячейки равно нулю и четвертая - если в ячейке не число, а текст.
+*/
         short noZerosFormat = format.getFormat("#");
-        short tripleDigitsMoneyFormat = format.getFormat("#,##0.00");
+        short usersTripleDigitsMoneyFormat = format.getFormat("##0.00;[Red]\"minus!\";#;[Red]\"text!\"");
 
         middleFont = wb.createFont();
         middleFont.setFontName("Times New Roman");
@@ -149,7 +160,7 @@ public class OperatorCellStyles {
         orderPrcStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
         orderPrcStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
         orderPrcStyle.setBorderLeft(CellStyle.BORDER_THIN);
-        orderPrcStyle.setDataFormat(noZerosFormat);
+        orderPrcStyle.setDataFormat(usersTripleDigitsMoneyFormat);
 
         partPrcStyle = wb.createCellStyle();
         partPrcStyle.setFont(middleFont);
@@ -159,7 +170,7 @@ public class OperatorCellStyles {
         partPrcStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
         partPrcStyle.setBorderBottom(CellStyle.BORDER_THIN);
         partPrcStyle.setBorderLeft(CellStyle.BORDER_THIN);
-        partPrcStyle.setDataFormat(noZerosFormat);
+        partPrcStyle.setDataFormat(usersTripleDigitsMoneyFormat);
 
         mtpPrcStyle = wb.createCellStyle();
         mtpPrcStyle.setFont(bigFontBold);
@@ -169,7 +180,7 @@ public class OperatorCellStyles {
         mtpPrcStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
         mtpPrcStyle.setBorderBottom(CellStyle.BORDER_THIN);
         mtpPrcStyle.setBorderLeft(CellStyle.BORDER_THIN);
-        mtpPrcStyle.setDataFormat(noZerosFormat);
+        mtpPrcStyle.setDataFormat(usersTripleDigitsMoneyFormat);
 
 /*        partPrcZeroStyle = wb.createCellStyle();
         partPrcZeroStyle.setFont(middleFont);
