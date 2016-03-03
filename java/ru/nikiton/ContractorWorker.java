@@ -92,10 +92,10 @@ public class ContractorWorker {
                 }
             }
             if(punktNumCellIndex == -1 || serviceNameCellIndex == -1 || orderCellIndex == -1 || workHoursCellIndex == -1 || serviceTariffCellIndex == -1 || serviceCostCellIndex == -1 || tableHatRowIndex == -1) {
-                throw new ExcelWorkerException("В Акте подрядчика "+contractor.getName()+" не найдена строка с шапкой таблицы! В шапке таблицы должны присутствовать ячейки: \"№ п/п\", \"Наименование работ\", \"№ заказа\", \"Количество отработанных часов\", \"Тариф с НДФЛ, руб\", \"Стоимость работ с НДФЛ, руб\"");
+                throw new ExcelWorkerException("В Акте подрядчика " + contractor.getName() + " не найдена строка с шапкой таблицы! В шапке таблицы должны присутствовать ячейки: \"№ п/п\", \"Наименование работ\", \"№ заказа\", \"Количество отработанных часов\", \"Тариф с НДФЛ, руб\", \"Стоимость работ с НДФЛ, руб\"");
             }
             if(tableFootRowIndex == -1) {
-                throw new ExcelWorkerException("В Акте подрядчика \"+contractor.getName()+\" не найдена строка Итого!");
+                throw new ExcelWorkerException("В Акте подрядчика " + contractor.getName() + " не найдена строка Итого!");
             }
             //2.2. If some rows already exists in table - delete them
             if(tableFootRowIndex > tableHatRowIndex+2) {
